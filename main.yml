@@ -1,0 +1,31 @@
+name: CI-CD Using Jenkins
+on:
+    push: 
+        branches: 
+        - main
+jobs:
+    my-first-job:
+        runs-on: ubuntu-latest
+
+        steps:
+        - name: checkout code
+          uses: actions/checkout@v2
+        - name: Build Docker Image
+          run: |
+            docker build . -t myimage .
+            echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin 
+            docker tag myimage akdochub/myimage
+            docker push akdochub/myimage
+        
+        - name: Setup SSH Key
+          run: |
+              echo "${{ secrets.EC2_PRIVATE_KEY }}" > /tmp/ssh_key
+              chmod 600 /tmp/ssh_key
+
+        - name: Connect to EC2
+          run: |
+              ssh -o "StrictHostKeyChecking=no" -i /tmp/ssh_key  ubuntu@3.0.102.45 "
+              kubectl delete deployment my-deployment
+              kubectl apply -f /home/ubuntu/my-deployment.yml
+              " 
+            
