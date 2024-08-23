@@ -7,4 +7,4 @@ data = {
 }
 
 df = pd.DataFrame(data)
-st.write('Course Details Table....')
+st.write('Course Details Table....11111')
